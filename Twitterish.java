@@ -151,6 +151,25 @@ public class Twitterish {
             System.out.println("Ignored " + friend.getName());
         }
 
+        private void unIgnoreFriend() {
+            if (this.loggedInUser.hasIgnoredFriends() == false) {
+                System.out.println("You don't have anyone to unignore. Try to ignore a few friends first.");
+                return;
+            }
+
+            System.out.println("Who to ignore?");
+            Account[] friends = this.loggedInUser.getIgnoredFriends();
+            this.printEnumeratedChoices(friends);
+
+            String choiceString = System.console().readLine();
+            int choice = Integer.parseInt(choiceString);
+            Account friend = friends[choice];
+
+            this.loggedInUser.unIgnoreFriend(friend);
+
+            System.out.println("Unignored " + friend.getName());
+        }
+
         private void quit() {
             System.out.println("Logging out...");
             this.sendMessage(new Logout(this.loggedInUser));
