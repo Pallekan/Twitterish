@@ -271,6 +271,7 @@ public class Twitterish {
             System.out.print("[R]emove friend    |  ");
             System.out.println();
             System.out.print("[I]gnore friend    |  ");
+            System.out.print("[U]nignore friend  |  ");
             System.out.print("[L]ist friends     |  ");
             System.out.print("[E]dit account     |  ");
             System.out.print("[Q]uit");
@@ -298,6 +299,9 @@ public class Twitterish {
                 return true;
             case 'i':
                 this.ignoreFriend();
+                return true;
+            case 'u':
+                this.unIgnoreFriend();
                 return true;
             case 'e':
                 this.editAccount();
