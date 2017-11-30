@@ -22,7 +22,7 @@ public class Twitterish {
     private static class Client {
         private Account loggedInUser;
         private Set<Account> knownUsers = new TreeSet<Account>();
-        private Feed feed;
+        private Feed feed = new Feed();
 
         private ObjectOutputStream out;
         private ObjectInputStream in;
@@ -80,7 +80,7 @@ public class Twitterish {
 
             String msg = System.console().readLine();
             sendMessage(new PostMessage(msg));
-
+            feed.addPost(new Post(1,loggedInUser,msg));
             System.out.println("Message sent");
         }
 
@@ -151,25 +151,6 @@ public class Twitterish {
             System.out.println("Ignored " + friend.getName());
         }
 
-        private void unIgnoreFriend() {
-            if (this.loggedInUser.hasIgnoredFriends() == false) {
-                System.out.println("You don't have anyone to unignore. Try to ignore a few friends first.");
-                return;
-            }
-
-            System.out.println("Who to ignore?");
-            Account[] friends = this.loggedInUser.getIgnoredFriends();
-            this.printEnumeratedChoices(friends);
-
-            String choiceString = System.console().readLine();
-            int choice = Integer.parseInt(choiceString);
-            Account friend = friends[choice];
-
-            this.loggedInUser.unIgnoreFriend(friend);
-
-            System.out.println("Unignored " + friend.getName());
-        }
-
         private void quit() {
             System.out.println("Logging out...");
             this.sendMessage(new Logout(this.loggedInUser));
@@ -217,12 +198,54 @@ public class Twitterish {
                 // TODO
                 // Use the feed object for this
                 for (Post p : ((SyncResponse) o).getPosts())
-                    System.out.println(p.render());
+                    {
+                        //  System.out.println(p.render());
+                    }
+                    
 
-            } else {
+            }
+            else {
                 System.out.println("Error: expected sync response, got " + o.getClass());
             }
         }
+
+
+                public void updateFeed() {
+
+                    
+                    if(feed != null)
+                        {
+                          System.out.println(feed.renderLatest(0));
+                        }
+                   
+                    
+                // TODO
+                // Go through all known users on this side of the fence
+                // and update them if their name has changed
+
+                // TODO
+                // Only print the posts that I am interested in
+
+                // TODO
+                // Use the feed object for this
+               
+
+                    
+                // TODO
+                // Go through all known users on this side of the fence
+                // and update them if their name has changed
+
+                // TODO
+                // Only print the posts that I am interested in
+
+                // TODO
+                // Use the feed object for this
+                
+                    
+
+            
+        }
+
 
         private ObjectOutputStream outgoing;
         private ObjectInputStream incoming;
@@ -271,9 +294,9 @@ public class Twitterish {
             System.out.print("[R]emove friend    |  ");
             System.out.println();
             System.out.print("[I]gnore friend    |  ");
-            System.out.print("[U]nignore friend  |  ");
             System.out.print("[L]ist friends     |  ");
             System.out.print("[E]dit account     |  ");
+            System.out.print("[U]pdate feed      |  ");
             System.out.print("[Q]uit");
             System.out.println();
 
@@ -300,14 +323,14 @@ public class Twitterish {
             case 'i':
                 this.ignoreFriend();
                 return true;
-            case 'u':
-                this.unIgnoreFriend();
-                return true;
             case 'e':
                 this.editAccount();
                 return true;
             case 'l':
                 this.listFriends();
+                return true;
+            case 'u':
+                this.updateFeed();
                 return true;
             case 'q':
                 this.quit();
