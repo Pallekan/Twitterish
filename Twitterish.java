@@ -22,6 +22,7 @@ public class Twitterish {
     private static class Client {
         private Account loggedInUser;
         private Set<Account> knownUsers = new TreeSet<Account>();
+        public Set<Account> accountsNoPasswords = new HashSet<Account>();
         private Feed feed = new Feed();
 
         private ObjectOutputStream out;
@@ -38,6 +39,7 @@ public class Twitterish {
 
         private void newAccount(Account account) {
             this.knownUsers.add(account);
+            this.accountsNoPasswords.add(account.safeCopy());
         }
 
         private void newPost(Post post) {
@@ -149,25 +151,6 @@ public class Twitterish {
             this.loggedInUser.ignoreFriend(friend);
 
             System.out.println("Ignored " + friend.getName());
-        }
-
-        private void unIgnoreFriend() {
-            if (this.loggedInUser.hasIgnoredFriends() == false) {
-                System.out.println("You don't have anyone to unignore. Try to ignore a few friends first.");
-                return;
-            }
-
-            System.out.println("Who to ignore?");
-            Account[] friends = this.loggedInUser.getIgnoredFriends();
-            this.printEnumeratedChoices(friends);
-
-            String choiceString = System.console().readLine();
-            int choice = Integer.parseInt(choiceString);
-            Account friend = friends[choice];
-
-            this.loggedInUser.unIgnoreFriend(friend);
-
-            System.out.println("Unignored " + friend.getName());
         }
 
         private void quit() {
@@ -313,7 +296,6 @@ public class Twitterish {
             System.out.print("[R]emove friend    |  ");
             System.out.println();
             System.out.print("[I]gnore friend    |  ");
-            System.out.print("[U]nignore friend  |  ");
             System.out.print("[L]ist friends     |  ");
             System.out.print("[E]dit account     |  ");
             System.out.print("[U]pdate feed      |  ");
@@ -342,9 +324,6 @@ public class Twitterish {
                 return true;
             case 'i':
                 this.ignoreFriend();
-                return true;
-            case 'u':
-                this.unIgnoreFriend();
                 return true;
             case 'e':
                 this.editAccount();

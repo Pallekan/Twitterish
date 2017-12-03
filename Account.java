@@ -10,6 +10,8 @@ public class Account implements Serializable, Comparable<Account> {
     private Set<Account> friends = new TreeSet<Account>();
     private Set<Account> ignoredFriends = new TreeSet<Account>();
     private int postsAtLastSync;
+
+
     
     public Account(String userId, String password) {
         this.userId   = userId;
@@ -21,6 +23,10 @@ public class Account implements Serializable, Comparable<Account> {
         this.name = name;
     }
 
+    public Account safeCopy() {
+        return new Account(userId,null);    //Gömmer lösenordet
+    }
+    
     public String getName() {
         return this.name;
     }
@@ -72,16 +78,8 @@ public class Account implements Serializable, Comparable<Account> {
         return this.friends.size() > 0;
     }
 
-    public boolean hasIgnoredFriends() {
-        return this.ignoredFriends.size() > 0;
-    }
-
     public Account[] getFriends() {
         return (Account[]) this.friends.toArray(new Account[0]);
-    }
-
-    public Account[] getIgnoredFriends() {
-        return (Account[]) this.ignoredFriends.toArray(new Account[0]);
     }
 
     public boolean equals(Object o) {

@@ -14,7 +14,8 @@ import java.net.*;
 public class Server {
     private Set<Account> knownUsers = new TreeSet<Account>();
     private List<Post> posts = new LinkedList<Post>();
-
+    private Set<Account> accountsNoPasswords = new HashSet<Account>();
+    
     public static void main(String[] args) {
         try {
             ServerSocket socket = new ServerSocket(args.length > 0 ? Integer.parseInt(args[0]) : 8080);
@@ -54,6 +55,10 @@ public class Server {
 
     public synchronized Set<Account> getAccounts() {
         return new TreeSet<Account>(this.knownUsers);
+    }
+    
+     public synchronized Set<Account> getAccountsSafe() {
+        return new TreeSet<Account>(this.accountsNoPasswords);
     }
 
     public synchronized List<Post> getPosts() {
@@ -164,8 +169,8 @@ public class Server {
                 System.out.println("<< SyncResponse");
                 //    this.outgoing.
 
-                    this.outgoing.writeObject(new SyncResponse(new HashSet<Account>(this.server.getAccounts()),
-                    new LinkedList<Post>(this.server.getNewFriendPosts(this.account))));
+                    this.outgoing.writeObject(new SyncResponse(new HashSet<Account>(this.server.getAccountsSafe()),
+                                                               new LinkedList<Post>(this.server.getNewFriendPosts(this.account)))); //No longer passing passwords from client to server
                     
                     
                     // writeObject(new SyncResponse(new HashSet<Account>(this.server.getAccounts()),
