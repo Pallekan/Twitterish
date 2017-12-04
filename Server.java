@@ -14,7 +14,7 @@ import java.net.*;
 public class Server {
     private Set<Account> knownUsers = new TreeSet<Account>();
     private List<Post> posts = new LinkedList<Post>();
-    private Set<Account> accountsNoPasswords = new HashSet<Account>();
+    private Set<Account> accountsNoPasswords = new TreeSet<Account>();
     
     public static void main(String[] args) {
         try {
@@ -47,6 +47,7 @@ public class Server {
 
     public synchronized void addAccount(Account a) {
         this.knownUsers.add(a);
+        this.accountsNoPasswords.add(a.safeCopy());
     }
 
     //goes through and updates names

@@ -24,7 +24,7 @@ public class Account implements Serializable, Comparable<Account> {
     }
 
     public Account safeCopy() {
-        return new Account(userId,null);    //Gömmer lösenordet
+        return new Account(userId,null,name);    //Gömmer lösenordet
     }
     
     public String getName() {
