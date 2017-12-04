@@ -10,6 +10,8 @@ public class Account implements Serializable, Comparable<Account> {
     private Set<Account> friends = new TreeSet<Account>();
     private Set<Account> ignoredFriends = new TreeSet<Account>();
     private int postsAtLastSync;
+
+
     
     public Account(String userId, String password) {
         this.userId   = userId;
@@ -21,6 +23,10 @@ public class Account implements Serializable, Comparable<Account> {
         this.name = name;
     }
 
+    public Account safeCopy() {
+        return new Account(userId,null);    //Gömmer lösenordet
+    }
+    
     public String getName() {
         return this.name;
     }
@@ -71,7 +77,8 @@ public class Account implements Serializable, Comparable<Account> {
     public boolean hasFriends() {
         return this.friends.size() > 0;
     }
-
+ 
+    //checks whether there are any ignored friends.
     public boolean hasIgnoredFriends() {
         return this.ignoredFriends.size() > 0;
     }
@@ -80,6 +87,7 @@ public class Account implements Serializable, Comparable<Account> {
         return (Account[]) this.friends.toArray(new Account[0]);
     }
 
+    //returns a list of all the ignored friends
     public Account[] getIgnoredFriends() {
         return (Account[]) this.ignoredFriends.toArray(new Account[0]);
     }
@@ -99,4 +107,34 @@ public class Account implements Serializable, Comparable<Account> {
     public void setPostAtLastSync(int posts) {
         this.postsAtLastSync = posts;
     }
+
+    public void updateFriends(Set<Account> accounts)
+    {
+        for (Account a : accounts)
+            {
+            if (this.friends.contains(a))
+                {
+                this.friends.remove(a);
+                this.friends.add(a);
+                }
+            if (this.ignoredFriends.contains(a))
+                {
+                this.friends.remove(a);
+                this.friends.add(a);
+                }
+            }
+    }
+        // Returns the name for a friend of the user. 
+    public String getFriendsName(Account a)
+    {
+        for (Account friend : this.friends)
+            {
+                if (friend.equals(a))
+                    {
+                        return friend.getName();
+                    }
+            }
+        return "That is not a friend";
+    }
+
 }

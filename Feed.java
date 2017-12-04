@@ -26,4 +26,18 @@ public class Feed {
 
         return result;
     }
+
+    //renders the posts of all friends of the account a and ignores all accounts on the ignored list.
+    public String filterRender(Account a)
+    {
+        String answer = "";
+        for (Post p : this.posts)
+            {
+                if (!(a.isCurrentlyIgnoring(p.getPoster())))
+                    {
+                    answer = answer+"{"+a.getFriendsName(p.getPoster())+"} says:\n"+p.renderOnlyContent()+ "\n";
+                    }
+            }
+        return answer;
+    }
 }

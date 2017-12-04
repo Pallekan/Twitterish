@@ -22,6 +22,7 @@ public class Twitterish {
     private static class Client {
         private Account loggedInUser;
         private Set<Account> knownUsers = new TreeSet<Account>();
+        public Set<Account> accountsNoPasswords = new HashSet<Account>();
         private Feed feed = new Feed();
 
         private ObjectOutputStream out;
@@ -36,8 +37,45 @@ public class Twitterish {
             this.port = port;
         }
 
+        //tests a string against enumerated choices, provided by the list in acc
+        private int testChoice(Account[] acc, String stringChoice)
+        {
+            stringChoice = testChoiceAux(stringChoice);
+            int choice = Integer.parseInt(stringChoice);
+
+
+            
+            while(acc.length <= choice || choice < 0){
+                System.out.println("Incorrect input number!");
+                stringChoice =System.console().readLine();
+                stringChoice = testChoiceAux(stringChoice);
+                choice = Integer.parseInt(stringChoice);
+            }
+            return choice;
+        }
+
+        private String testChoiceAux(String stringChoice)
+        {
+            int choice;
+            boolean correctFormat =true;
+            do{
+                correctFormat =true;
+                try{
+                    choice = Integer.parseInt(stringChoice);
+                }
+                catch (NumberFormatException e){
+                    System.out.println("Not a number!");
+                    stringChoice = System.console().readLine();
+                    correctFormat=false;
+                }
+            }while(correctFormat==false);
+            
+            return stringChoice;
+        }
+        
         private void newAccount(Account account) {
             this.knownUsers.add(account);
+            this.accountsNoPasswords.add(account.safeCopy());
         }
 
         private void newPost(Post post) {
@@ -53,6 +91,7 @@ public class Twitterish {
         // You should not need to change this code.
         private void sendMessage(Object o) {
             try {
+                this.outgoing.reset(); //allow the code to reset.
                 this.outgoing.writeObject(o);
                 this.outgoing.flush();
             } catch (IOException ioe) {
@@ -75,12 +114,13 @@ public class Twitterish {
             return null;
         }
 
+        //sends a post as a message to the server
         private void postMessage() {
             System.out.println("Write your message on a single line: ");
 
             String msg = System.console().readLine();
             sendMessage(new PostMessage(msg));
-            feed.addPost(new Post(1,loggedInUser,msg));
+            // feed.addPost(new Post(1,loggedInUser,msg));
             System.out.println("Message sent");
         }
 
@@ -103,7 +143,7 @@ public class Twitterish {
             printEnumeratedChoices(knownUsers);
 
             String choiceString = System.console().readLine();
-            int choice = Integer.parseInt(choiceString);
+            int choice = testChoice(this.knownUsers.toArray(new Account[0]), choiceString);
             Account friend = knownUsers[choice];
 
             sendMessage(new AddFriend(friend));
@@ -123,7 +163,7 @@ public class Twitterish {
             this.printEnumeratedChoices(friends);
 
             String choiceString = System.console().readLine();
-            int choice = Integer.parseInt(choiceString);
+            int choice = testChoice(friends, choiceString);
             Account friend = friends[choice];
 
             sendMessage(new RemoveFriend(friend));
@@ -143,7 +183,7 @@ public class Twitterish {
             this.printEnumeratedChoices(friends);
 
             String choiceString = System.console().readLine();
-            int choice = Integer.parseInt(choiceString);
+            int choice = testChoice(friends, choiceString);
             Account friend = friends[choice];
 
             this.loggedInUser.ignoreFriend(friend);
@@ -158,12 +198,12 @@ public class Twitterish {
             }
 
             System.out.println("Who to ignore?");
-            Account[] friends = this.loggedInUser.getIgnoredFriends();
-            this.printEnumeratedChoices(friends);
+            Account[] ignoredFriends = this.loggedInUser.getIgnoredFriends();
+            this.printEnumeratedChoices(ignoredFriends);
 
             String choiceString = System.console().readLine();
-            int choice = Integer.parseInt(choiceString);
-            Account friend = friends[choice];
+            int choice = testChoice(ignoredFriends, choiceString);
+            Account friend = ignoredFriends[choice];
 
             this.loggedInUser.unIgnoreFriend(friend);
 
@@ -175,6 +215,8 @@ public class Twitterish {
             this.sendMessage(new Logout(this.loggedInUser));
         }
 
+
+        //edits the user account
         private void editAccount() {
             System.out.print("Enter your password: ");
             String password = new String(System.console().readPassword());
@@ -188,6 +230,10 @@ public class Twitterish {
 
                 String userid = this.loggedInUser.getUserId();
                 this.sendMessage(new Account(userid, password, name));
+
+                //update lokally-->
+                this.loggedInUser.setPassword(password);
+                this.loggedInUser.setName(name);
             } else {
                 System.out.println("Wrong password!");
             }
@@ -202,11 +248,20 @@ public class Twitterish {
             }
         }
 
+
+        //syncs with the server, list of accounts and posts.
         private void syncWithServer() {
             this.sendMessage(new SyncRequest());
             Object o = this.receiveMessage();
             if (o instanceof SyncResponse) {
+                //resets the local lists.
+                this.knownUsers.clear();
                 this.knownUsers.addAll(((SyncResponse) o).getUsers());
+                this.loggedInUser.updateFriends(this.knownUsers);
+
+
+                
+                
                 // TODO
                 // Go through all known users on this side of the fence
                 // and update them if their name has changed
@@ -216,8 +271,13 @@ public class Twitterish {
 
                 // TODO
                 // Use the feed object for this
+
+                
+                //resets posts for name.
                 for (Post p : ((SyncResponse) o).getPosts())
                     {
+                        
+                        newPost(p);
                         //  System.out.println(p.render());
                     }
                     
@@ -234,7 +294,7 @@ public class Twitterish {
                     
                     if(feed != null)
                         {
-                          System.out.println(feed.renderLatest(0));
+                            System.out.println(this.feed.filterRender(this.loggedInUser));
                         }
                    
                     
@@ -313,7 +373,7 @@ public class Twitterish {
             System.out.print("[R]emove friend    |  ");
             System.out.println();
             System.out.print("[I]gnore friend    |  ");
-            System.out.print("[U]nignore friend  |  ");
+            System.out.print("Uni[G]nore friend  |  ");
             System.out.print("[L]ist friends     |  ");
             System.out.print("[E]dit account     |  ");
             System.out.print("[U]pdate feed      |  ");
@@ -343,7 +403,7 @@ public class Twitterish {
             case 'i':
                 this.ignoreFriend();
                 return true;
-            case 'u':
+            case 'g':
                 this.unIgnoreFriend();
                 return true;
             case 'e':
