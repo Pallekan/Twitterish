@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+//by: Daniel Harjuniemi, Pelle Ingvast
+
 /// Each client creates a new Client instance which holds a connection to the server.
 public class Twitterish {
     public static void main(String[] args) {
