@@ -14,7 +14,7 @@ import java.net.*;
 public class Server {
     private Set<Account> knownUsers = new TreeSet<Account>();
     private List<Post> posts = new LinkedList<Post>();
-    private Set<Account> accountsNoPasswords = new TreeSet<Account>();
+    private Set<Account> accountsNoPasswords = new HashSet<Account>();
     
     public static void main(String[] args) {
         try {
